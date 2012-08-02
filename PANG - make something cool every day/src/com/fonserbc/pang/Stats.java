@@ -10,6 +10,7 @@ public class Stats {
     private DecimalFormat df = new DecimalFormat("0.##");
 	private final static int 	STAT_INTERVAL = 500;
 	private final static int	FPS_HISTORY_NR = 32;
+	private final static int	FONT_SIZE = 20;
 	
 	private long statusIntervalTimer	= 0l;
 	
@@ -22,8 +23,12 @@ public class Stats {
 	
 	private int it = 0;
 	
-	public Stats() {
+	private MainThread game;
+	
+	public Stats(MainThread thread) {
+		game = thread;
 		timer = new Timer();
+		timer.setReal(true);
 		tickStore = new double[FPS_HISTORY_NR];
 		for (int i = 0; i < FPS_HISTORY_NR; i++) {
 			tickStore[i] = 0.0;
@@ -57,7 +62,15 @@ public class Stats {
 		if (canvas != null && fpsString != null) {
 			Paint paint = new Paint();
 			paint.setARGB(255, 255, 255, 255);
-			canvas.drawText(fpsString, 20, 20, paint);
+			paint.setTextSize(FONT_SIZE);
+			canvas.drawText(fpsString+" / "+game.MAX_FPS, 20, 20, paint);
+			String ballsString;
+			synchronized (game.balls) {
+				ballsString = game.balls.size() + " balls";
+			}
+			canvas.drawText(ballsString, canvas.getWidth()-paint.measureText(ballsString)-20, 20, paint);
+			//String gravityStr = "("+df.format(game.gravity.x)+", "+df.format(game.gravity.y)+")";
+			//canvas.drawText(gravityStr, 20, 40, paint);
 		}
 	}
 	

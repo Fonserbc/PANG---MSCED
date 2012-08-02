@@ -1,9 +1,8 @@
 package com.fonserbc.pang;
 
-import android.os.SystemClock;
-
 public class Timer {
 	
+	private static final float DEF_MAXSTEP = 0.05f;;
 	private float gameTime = 0;
 	public float maxStep = 0.05f;
 	private long wallLastTimeStamp = 0;
@@ -37,5 +36,10 @@ public class Timer {
 	
 	public long falseTickMs() {
 		return (System.currentTimeMillis() - wallLastTimeStamp);
+	}
+
+	public void setReal(boolean real) {
+		if (real) maxStep = 100000f;
+		else maxStep = DEF_MAXSTEP;
 	}
 }

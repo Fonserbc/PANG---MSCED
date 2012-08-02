@@ -13,10 +13,11 @@ public class Ball {
 	private Bitmap[] sprites;
 	private Bitmap sprite;
 	private GameView gameView;
+	private MainThread game;
 	
 	public Vector2f position;
 	public Vector2f velocity;
-	public Vector2f gravity;
+	
 	public float width;
 	public float height;
 	public float bounce;
@@ -24,16 +25,16 @@ public class Ball {
 	public int it;
 	
 	
-	public Ball (Bitmap[] sprites, GameView gameView) {
+	public Ball (Bitmap[] sprites, GameView gameView, MainThread thread) {
 		this.sprites = sprites;
 		this.gameView = gameView;
+		this.game = thread;
 		scale = 1;
 		
 		setScale(0);
 		
 		position = new Vector2f();
 		velocity = new Vector2f();
-		gravity = new Vector2f();
 	}
 	
 	private void setScale(int s) {
@@ -49,24 +50,41 @@ public class Ball {
 	public void update (float deltaTime) {
 		float sqrDeltaTime = deltaTime*deltaTime;
 		
-		position.x += velocity.x * deltaTime + 0.5f * gravity.x * sqrDeltaTime;
-		position.y += velocity.y * deltaTime + 0.5f * gravity.y * sqrDeltaTime;
+		position.x += velocity.x * deltaTime + 0.5f * game.gravity.x * sqrDeltaTime;
+		position.y += velocity.y * deltaTime + 0.5f * game.gravity.y * sqrDeltaTime;
 		
-		velocity.x += gravity.x * deltaTime;
-		velocity.y += gravity.y * deltaTime;
+		velocity.x += game.gravity.x * deltaTime;
+		velocity.y += game.gravity.y * deltaTime;
 		
-		if (position.x + width > gameView.getWidth() && velocity.x > 0f) {
-			velocity.x = -velocity.x;
+		if (!game.useSensor) {
+			if (position.x + width > gameView.getWidth() && velocity.x > 0f) {
+				velocity.x = -velocity.x;
+			}
+			else if (position.x < 0f && velocity.x < 0f) {
+				velocity.x = -velocity.x;
+			}
+	
+			if (position.y < 0f && velocity.y < 0f) {
+				velocity.y = -velocity.y;
+			}
+			else if (position.y + height > gameView.getHeight() && velocity.y > 0f) {
+				velocity.y = -bounce;
+			}
 		}
-		else if (position.x < 0f && velocity.x < 0f) {
-			velocity.x = -velocity.x;
-		}
-
-		if (position.y < 0f && velocity.y < 0f) {
-			velocity.y = -velocity.y;
-		}
-		else if (position.y + height > gameView.getHeight() && velocity.y > 0f) {
-			velocity.y = -bounce;
+		else {
+			if (position.x + width > gameView.getWidth() && velocity.x > 0f) {
+				velocity.x = -velocity.x*0.9f;
+			}
+			else if (position.x < 0f && velocity.x < 0f) {
+				velocity.x = -velocity.x*0.9f;
+			}
+	
+			if (position.y < 0f && velocity.y < 0f) {
+				velocity.y = -velocity.y*0.9f;
+			}
+			else if (position.y + height > gameView.getHeight() && velocity.y > 0f) {
+				velocity.y = -velocity.y*0.9f;
+			}
 		}
 	}
 	
@@ -85,8 +103,8 @@ public class Ball {
 
 	public void divide(ArrayList<Ball> balls) {
 		if (scale > 0.25) {
-			Ball b1 = new Ball(sprites, gameView);
-			Ball b2 = new Ball(sprites, gameView);
+			Ball b1 = new Ball(sprites, gameView, game);
+			Ball b2 = new Ball(sprites, gameView, game);
 			
 			b1.setScale(it+1);
 			b2.setScale(it+1);
@@ -96,9 +114,6 @@ public class Ball {
 			
 			b1.velocity = new Vector2f(velocity.x, velocity.y);
 			b2.velocity = new Vector2f(-velocity.x, velocity.y);
-			
-			b1.gravity = gravity;
-			b2.gravity = gravity;
 			
 			balls.add(b1);
 			balls.add(b2);

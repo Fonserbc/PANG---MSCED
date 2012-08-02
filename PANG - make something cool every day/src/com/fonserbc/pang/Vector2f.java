@@ -19,4 +19,9 @@ public class Vector2f {
 	public float magnitude() {
 		return FloatMath.sqrt((x*x + y*y));
 	}
+	
+	public Vector2f normalized() {
+		float magnitude = magnitude();
+		return new Vector2f(x/magnitude, y/magnitude);
+	}
 }

@@ -2,10 +2,6 @@ package com.fonserbc.pang;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -60,7 +56,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 	    if (keyCode == KeyEvent.KEYCODE_BACK) {
-	    	((Activity)getContext()).moveTaskToBack(true);
+	    	((Activity)getContext()).finish();
 	        return true;
 	    }
 	    return super.onKeyDown(keyCode, event);
@@ -68,12 +64,30 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	
 	public void pause() {
 		thread.setRunning(false);
-		//thread.stop();
 	}
 
 	public void resume() {
 		thread.setRunning(true);
-		//thread.start();
+	}
+
+	public void setFPS(int n) {
+		if (n > 0) {
+			thread.setFPS(n);
+		}
+	}
+
+	public void setBalls(int n) {
+		if (n > 0) {
+			thread.setBalls(n);
+		}		
+	}
+
+	public void useGravity(boolean use) {
+		thread.useGravity(use);
+	}
+
+	public void notifyGravity(Vector2f gravity) {
+		thread.notifyGravity(gravity);		
 	}
 
 	
