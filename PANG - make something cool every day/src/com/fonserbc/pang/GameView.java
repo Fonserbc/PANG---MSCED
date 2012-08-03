@@ -2,6 +2,7 @@ package com.fonserbc.pang;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -45,6 +46,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 			}
 		}
 	}
+	
+	public MainThread getThread() {
+		return thread;
+	}
 
 	public boolean onTouchEvent(MotionEvent event) {
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -68,27 +73,5 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
 	public void resume() {
 		thread.setRunning(true);
-	}
-
-	public void setFPS(int n) {
-		if (n > 0) {
-			thread.setFPS(n);
-		}
-	}
-
-	public void setBalls(int n) {
-		if (n > 0) {
-			thread.setBalls(n);
-		}		
-	}
-
-	public void useGravity(boolean use) {
-		thread.useGravity(use);
-	}
-
-	public void notifyGravity(Vector2f gravity) {
-		thread.notifyGravity(gravity);		
-	}
-
-	
+	}	
 }

@@ -112,8 +112,12 @@ public class Ball {
 			b1.position = new Vector2f(position.x+width/2, position.y+height/2);
 			b2.position = new Vector2f(position.x+width/2, position.y+height/2);
 			
-			b1.velocity = new Vector2f(velocity.x, velocity.y);
-			b2.velocity = new Vector2f(-velocity.x, velocity.y);
+			Vector2f g = game.gravity.normalized();
+			float v1 = g.dotProduct(velocity);
+			Vector2f V1 = g.scale(v1);
+			Vector2f V2 = velocity.minus(V1);
+			b1.velocity = V1.plus(V2);
+			b2.velocity = V1.plus(V2.inversed());
 			
 			balls.add(b1);
 			balls.add(b2);

@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -90,7 +91,6 @@ public class MainThread extends Thread
 							//Update
 							for (Ball ball : balls)
 								ball.update(deltaTime);
-							stats.update();
 							
 							//Draw	
 							canvas.drawColor(Color.BLACK);
@@ -108,7 +108,9 @@ public class MainThread extends Thread
 				}
 				
 				/**SLEEP**/
-				sleepTime = FRAME_PERIOD - timer.falseTickMs();
+				long workingTime = timer.falseTickMs();
+				sleepTime = FRAME_PERIOD - workingTime;
+				stats.update(workingTime);
 				
 				if (sleepTime > 0) {
 					try {
@@ -172,5 +174,13 @@ public class MainThread extends Thread
 			Vector2f norm = gravity.normalized();
 			this.gravity = new Vector2f(norm.x*DEF_GM, norm.y*DEF_GM);
 		}		
+	}
+
+	public void restoreState(Bundle savedInstanceState) {
+				
+	}
+
+	public void saveState(Bundle outState) {
+		
 	}
 }

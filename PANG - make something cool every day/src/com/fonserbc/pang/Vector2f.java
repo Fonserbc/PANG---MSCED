@@ -24,4 +24,24 @@ public class Vector2f {
 		float magnitude = magnitude();
 		return new Vector2f(x/magnitude, y/magnitude);
 	}
+
+	public float dotProduct(Vector2f v) {
+		return x*v.x + y*v.y;
+	}
+	
+	public Vector2f scale(float f) {
+		return new Vector2f (x*f, y*f);
+	}
+
+	public Vector2f minus(Vector2f v) {
+		return new Vector2f (x - v.x, y - v.y);
+	}
+
+	public Vector2f plus(Vector2f v) {
+		return new Vector2f (x + v.x, y + v.y);
+	}
+
+	public Vector2f inversed() {
+		return new Vector2f (-x, -y);
+	}
 }

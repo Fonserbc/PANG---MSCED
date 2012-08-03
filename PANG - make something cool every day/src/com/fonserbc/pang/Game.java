@@ -38,7 +38,9 @@ public class Game extends Activity implements SensorEventListener {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         game = new GameView(this);
+        
         setContentView(game);
+        Log.d(TAG, "Create");
     }
 
     @Override
@@ -68,7 +70,7 @@ public class Game extends Activity implements SensorEventListener {
     }
     
     private void useGravity(boolean checked) {
-		game.useGravity(checked);	
+		game.getThread().useGravity(checked);	
 	}
 
 	private void setFPS() {
@@ -83,7 +85,7 @@ public class Game extends Activity implements SensorEventListener {
                                   int whichButton) {
               EditText name=(EditText)addView.findViewById(R.id.title);
                
-              game.setFPS(Integer.parseInt(name.getText().toString()));
+              game.getThread().setFPS(Integer.parseInt(name.getText().toString()));
             }
           })
           .setNegativeButton("Discard", null)
@@ -102,7 +104,7 @@ public class Game extends Activity implements SensorEventListener {
                                   int whichButton) {
               EditText name=(EditText)addView.findViewById(R.id.title);
                
-              game.setBalls(Integer.parseInt(name.getText().toString()));
+              game.getThread().setBalls(Integer.parseInt(name.getText().toString()));
             }
           })
           .setNegativeButton("Discard", null)
@@ -114,33 +116,21 @@ public class Game extends Activity implements SensorEventListener {
 		
 		Vector2f gravity = new Vector2f(event.values[1], event.values[0]);
 		
-		game.notifyGravity(gravity);
+		game.getThread().notifyGravity(gravity);
 	}
 	
     @Override
     public void onPause() {
-    	super.onPause();
-    	game.pause();
     	Log.d(TAG, "Pause");
+    	game.pause();
+    	super.onPause();
     }
     
     @Override
     public void onResume() {
+    	super.onResume();
     	Log.d(TAG, "Resume");
     	game.resume();
-    	super.onResume();
-    }
-    
-    @Override
-    public void onStop() {
-    	Log.d(TAG, "Stop");
-    	super.onStop();
-    }
-    
-    @Override
-    public void onDestroy() {
-		Log.d(TAG, "Destroy");
-    	super.onDestroy();
     }
 
 	public void onAccuracyChanged(Sensor arg0, int arg1) {
