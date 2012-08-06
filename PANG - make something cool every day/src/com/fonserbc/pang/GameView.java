@@ -13,8 +13,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	private static final String TAG = GameView.class.getSimpleName();
 	private MainThread thread;
 	
-	private boolean firstCreated = true;
-	
 	public GameView(Context context) {
 		super(context);getHolder().addCallback(this);
 		
@@ -29,10 +27,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
 	public void surfaceCreated(SurfaceHolder arg0) {
 		thread.setRunning(true);
-		if (firstCreated) {
-			thread.start();
-			firstCreated = false;
-		}
+		thread.start();
 	}
 
 	public void surfaceDestroyed(SurfaceHolder arg0) {
@@ -61,7 +56,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 	    if (keyCode == KeyEvent.KEYCODE_BACK) {
-	    	//((Activity)getContext()).finish();
+	    	((Activity)getContext()).finish();
 	        return true;
 	    }
 	    return super.onKeyDown(keyCode, event);

@@ -35,9 +35,9 @@ public class Stats {
 	private int it = 0;
 	private int cpuIt = 0;
 	
-	private boolean showFPS = false;
-	private boolean showCPU = false;
-	private boolean showBalls = false;
+	public boolean showFPS = false;
+	public boolean showCPU = false;
+	public boolean showBalls = false;
 	
 	private MainThread game;
 	

@@ -14,7 +14,7 @@ import android.view.SurfaceHolder;
 
 public class MainThread extends Thread 
 {
-	public int 	MAX_FPS = 60;
+	public int 		MAX_FPS = 60;
 	private int		FRAME_PERIOD = 1000 / MAX_FPS;	
 	public int		NUM_BALLS = 1;
 	
@@ -31,7 +31,7 @@ public class MainThread extends Thread
 	private Timer timer;
 	private Timer timerCPU;
 	
-	private Stats stats;
+	public Stats stats;
 	
 	public ArrayList<Ball> balls;
 	
@@ -48,6 +48,7 @@ public class MainThread extends Thread
 		this.gameView = gameView;
 		timer =  new Timer();
 		timerCPU = new Timer();
+		stats = new Stats(this);
 		gravity = new Vector2f(DEF_GX, DEF_GY);
 	}
 
@@ -68,7 +69,6 @@ public class MainThread extends Thread
 		long deltaTimeMs = 0;
 		long sleepTime = 0;
 		float lastCPUtime = 0.0f;
-		stats = new Stats(this);
 		
 		Random rand = new Random();
 		balls = new ArrayList<Ball>();
@@ -150,11 +150,13 @@ public class MainThread extends Thread
 		}
 	}
 
-	public void setFPS(int n) {
-		MAX_FPS = n;
-		FRAME_PERIOD = 1000 / MAX_FPS;
-		if (n < 22) timer.setReal(true);
-		else timer.setReal(false);
+	public void setFPS(Integer n) {
+		if (n > 0) {
+			MAX_FPS = n;
+			FRAME_PERIOD = 1000 / MAX_FPS;
+			if (n < 22) timer.setReal(true);
+			else timer.setReal(false);
+		}
 	}
 
 	public void setBalls(int n) {
@@ -182,10 +184,8 @@ public class MainThread extends Thread
 	}
 
 	public void notifyGravity(Vector2f gravity) {
-		if (useSensor) {
-			Vector2f norm = gravity.normalized();
-			this.gravity = new Vector2f(norm.x*DEF_GM, norm.y*DEF_GM);
-		}		
+		Vector2f norm = gravity.normalized();
+		this.gravity = new Vector2f(norm.x*DEF_GM, norm.y*DEF_GM);
 	}
 
 	public void restoreState(Bundle savedInstanceState) {
