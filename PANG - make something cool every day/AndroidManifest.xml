@@ -15,7 +15,8 @@
             android:name=".Game"
             android:label="@string/title_activity_game"
             android:screenOrientation="landscape" 
-            android:hardwareAccelerated="true">
+            android:hardwareAccelerated="true"
+            android:finishOnTaskLaunch="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

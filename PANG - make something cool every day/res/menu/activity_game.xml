@@ -3,13 +3,30 @@
     <item android:id="@+id/number_of_balls"
         android:title="@string/number_of_balls" />
     
-    <item android:id="@+id/fps"
-        android:title="@string/fps" />
-    
     <item android:id="@+id/sensor"
     	android:title="@string/sensor"
     	android:checkable="true"
     	android:checked="false" />
+    
+    <item android:id="@+id/other"
+        android:title="@string/other">
+        <menu>
+            <item android:id="@+id/ballsCheck" 
+                android:title="@string/ballsCheck"
+                android:checkable="true"
+    			android:checked="false" />
+            <item android:id="@+id/fpsCheck" 
+                android:title="@string/fpsCheck"
+                android:checkable="true"
+    			android:checked="false" />
+            <item android:id="@+id/cpu"
+                android:title="@string/cpu"
+                android:checkable="true"
+    			android:checked="false" />
+            <item android:id="@+id/fps"
+        		android:title="@string/fps" />
+        </menu>
+    </item>
     
     <item android:id="@+id/quit"
         android:title="@string/quit" />

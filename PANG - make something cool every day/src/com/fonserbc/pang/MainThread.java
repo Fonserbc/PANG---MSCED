@@ -29,6 +29,9 @@ public class MainThread extends Thread
 	private GameView gameView;
 	
 	private Timer timer;
+	private Timer timerCPU;
+	
+	private Stats stats;
 	
 	public ArrayList<Ball> balls;
 	
@@ -37,12 +40,14 @@ public class MainThread extends Thread
 	public Vector2f gravity;
 	
 	boolean useSensor = false;
+	boolean showCPU = false;
 
 	public MainThread(SurfaceHolder surfaceHolder, GameView gameView) {
 		super();
 		this.surfaceHolder = surfaceHolder;
 		this.gameView = gameView;
 		timer =  new Timer();
+		timerCPU = new Timer();
 		gravity = new Vector2f(DEF_GX, DEF_GY);
 	}
 
@@ -62,7 +67,8 @@ public class MainThread extends Thread
 		float deltaTime = 0;
 		long deltaTimeMs = 0;
 		long sleepTime = 0;
-		Stats stats = new Stats(this);
+		float lastCPUtime = 0.0f;
+		stats = new Stats(this);
 		
 		Random rand = new Random();
 		balls = new ArrayList<Ball>();
@@ -79,6 +85,10 @@ public class MainThread extends Thread
 		while (!this.isInterrupted()) {
 			if (running) {
 				canvas = null;
+				if (showCPU) {
+					float cpuTick = timerCPU.tick();
+					stats.updateCPU(lastCPUtime/cpuTick);
+				}
 				
 				try {				
 					canvas = this.surfaceHolder.lockCanvas();
@@ -100,6 +110,17 @@ public class MainThread extends Thread
 						stats.draw(canvas);
 						/**Game Update&Draw**/
 					}
+					
+					/**SLEEP**/
+					long workingTime = timer.falseTickMs();
+					sleepTime = FRAME_PERIOD - workingTime;
+					stats.updateFPS();
+					
+					if (sleepTime > 0) {
+						try {
+							sleep(sleepTime);
+						} catch (InterruptedException e) {}
+					}
 				}
 				finally {
 					if (canvas != null) {
@@ -107,16 +128,7 @@ public class MainThread extends Thread
 					}
 				}
 				
-				/**SLEEP**/
-				long workingTime = timer.falseTickMs();
-				sleepTime = FRAME_PERIOD - workingTime;
-				stats.update(workingTime);
-				
-				if (sleepTime > 0) {
-					try {
-						sleep(sleepTime);
-					} catch (InterruptedException e) {}
-				}
+				if (showCPU) lastCPUtime = timerCPU.falseTick();
 			}
 			else {	//Paused
 				try { Thread.sleep(100); } catch (InterruptedException ie) {}
@@ -153,7 +165,7 @@ public class MainThread extends Thread
 			balls.clear();
 			for (int i = 0; i < NUM_BALLS; ++i) {
 				Ball ball = new Ball(ballSprites, gameView, this);
-				ball.position = new Vector2f((gameView.getWidth() - ball.width)*rand.nextFloat(), (gameView.getHeight()/3)*rand.nextFloat());
+				ball.position = new Vector2f((gameView.getWidth() - ball.width)*rand.nextFloat(), (gameView.getHeight() - ball.height)*rand.nextFloat());
 				boolean positive = rand.nextBoolean();
 				ball.velocity = new Vector2f(((positive)? 1 : -1)*rand.nextFloat()*150f+((positive)? 50 : -50), 0f);
 				balls.add(ball);
@@ -182,5 +194,18 @@ public class MainThread extends Thread
 
 	public void saveState(Bundle outState) {
 		
+	}
+
+	public void showCPU(boolean checked) {
+		showCPU = checked;
+		stats.showCPU(checked);
+	}
+
+	public void showFPS(boolean checked) {
+		stats.showFPS(checked);
+	}
+
+	public void showBalls(boolean checked) {
+		stats.showBalls(checked);		
 	}
 }

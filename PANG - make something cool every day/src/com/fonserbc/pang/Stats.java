@@ -4,85 +4,132 @@ import java.text.DecimalFormat;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Log;
 
 public class Stats {
+	private static final String TAG = Game.class.getSimpleName();;
 	
     private DecimalFormat df = new DecimalFormat("0.##");
-	private final static int 	STAT_INTERVAL = 300;
-	private final static int	FPS_HISTORY_NR = 10;
+    private DecimalFormat dfCPU = new DecimalFormat("0.###");
+	private final static int 	STAT_INTERVAL_FPS = 300;
+	private final static int 	STAT_INTERVAL_CPU = 200;
+	private final static int	FPS_HISTORY = 10;
+	private final static int	CPU_HISTORY = 60;
 	private final static int	FONT_SIZE = 20;
 	
-	private long statusIntervalTimer	= 0l;
+	private long FPSIntervalTimer	= 0l;
+	private long CPUIntervalTimer	= 0l;
 	
 	private double 	tickStore[];
 	private double 	averageFps = 0.0;
 	
-	private long cpuStore[];
+	private double cpuStore[];
 	private double averageCpu = 0.0;
 	
-	private Timer timer;
+	private Timer timerFPS;
+	private Timer timerCPU;
 	
 	private String fpsString;
 	private String cpuString;
 	
 	private int it = 0;
+	private int cpuIt = 0;
+	
+	private boolean showFPS = false;
+	private boolean showCPU = false;
+	private boolean showBalls = false;
 	
 	private MainThread game;
 	
 	public Stats(MainThread thread) {
 		game = thread;
-		timer = new Timer();
-		timer.setReal(true);
-		tickStore = new double[FPS_HISTORY_NR];
-		cpuStore = new long[FPS_HISTORY_NR];
-		for (int i = 0; i < FPS_HISTORY_NR; i++) {
+		timerFPS = new Timer();
+		timerFPS.setReal(true);
+		timerCPU = new Timer();
+		timerCPU.setReal(true);
+		
+		tickStore = new double[FPS_HISTORY];
+		cpuStore = new double[CPU_HISTORY];
+		for (int i = 0; i < FPS_HISTORY; i++)
 			tickStore[i] = 0.0;
-			cpuStore[i] = 0;
-		}
+		for (int i = 0; i < CPU_HISTORY; i++)
+			cpuStore[i] = 0.0;
+		
+		fpsString = "FPS:";
+		cpuString = "CPU:";
 	}
 	
-	public void update (long workingTime) {
-		float deltaTime = timer.tick();
-		long deltaMs = timer.getLastTickMs();
+	public void updateFPS () {
+		float deltaTime = timerFPS.tick();
+		long deltaMs = timerFPS.getLastTickMs();
 		
 		tickStore[it] = deltaTime;
-		cpuStore[it] = workingTime;
-		it = (it+1)%FPS_HISTORY_NR;
+		it = (it+1)%FPS_HISTORY;
 
-		statusIntervalTimer += deltaMs;
+		FPSIntervalTimer += deltaMs;
 
-		if (statusIntervalTimer >= STAT_INTERVAL) {
-			
+		if (FPSIntervalTimer >= STAT_INTERVAL_FPS) {
 			double totalTime = 0;
-			long cpuTime = 0;
-			for (int i = 0; i < FPS_HISTORY_NR; ++i) {
+			for (int i = 0; i < FPS_HISTORY; ++i)
 				totalTime += tickStore[i];
-				cpuTime += cpuStore[i];
-			}
 			
-			averageFps = FPS_HISTORY_NR/totalTime;
-			averageCpu = ((double)cpuTime*100d)/(double)statusIntervalTimer;
+			averageFps = FPS_HISTORY/totalTime;
 			
 			fpsString = "FPS: " + df.format(averageFps);
-			cpuString = "CPU: " + df.format(averageCpu) + " %";
 			
-			statusIntervalTimer = 0;
+			FPSIntervalTimer = 0;
 		}
 	}
 	
 	public void draw (Canvas canvas) {
-		if (canvas != null && fpsString != null && cpuString != null) {
+		if (canvas != null) {
 			Paint paint = new Paint();
 			paint.setARGB(255, 255, 255, 255);
 			paint.setTextSize(FONT_SIZE);
-			canvas.drawText(fpsString+" / "+game.MAX_FPS, 20, 20, paint);
-			canvas.drawText(cpuString, 20, 40, paint);
-			String ballsString;
-			synchronized (game.balls) {
-				ballsString = game.balls.size() + " balls";
+			if (showFPS) canvas.drawText(fpsString+" / "+game.MAX_FPS, 20, 20, paint);
+			if (showCPU) canvas.drawText(cpuString, 20, 40, paint);
+			if (showBalls) {
+				String ballsString;
+				synchronized (game.balls) {
+					ballsString = game.balls.size() + " balls";
+				}
+				canvas.drawText(ballsString, canvas.getWidth()-paint.measureText(ballsString)-20, 20, paint);
 			}
-			canvas.drawText(ballsString, canvas.getWidth()-paint.measureText(ballsString)-20, 20, paint);
 		}
+	}
+
+	public void updateCPU(double cpuUsage) {
+		timerCPU.tick();
+		long deltaTime = timerCPU.getLastTickMs();
+		
+		cpuStore[cpuIt] = cpuUsage;
+		cpuIt = (cpuIt+1)%CPU_HISTORY;
+		
+		CPUIntervalTimer += deltaTime;
+		
+		if (CPUIntervalTimer >= STAT_INTERVAL_CPU) {
+			
+			double cpuTime = 0;			
+			for (int i = 0; i < CPU_HISTORY; i++)
+				cpuTime += cpuStore[i];
+			averageCpu = cpuTime/(double)CPU_HISTORY;
+			
+			cpuString = "CPU: " + dfCPU.format(averageCpu) + " %";
+			
+			CPUIntervalTimer = 0;
+		}
+	}
+
+	public void showCPU(boolean checked) {
+		showCPU = checked;		
+	}
+	
+	public void showFPS(boolean checked) {
+		showFPS = checked;
+	}
+
+	public void showBalls(boolean checked) {
+		showBalls = checked;
 	}
 	
 }

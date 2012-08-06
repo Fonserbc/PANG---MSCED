@@ -64,12 +64,37 @@ public class Game extends Activity implements SensorEventListener {
             case R.id.sensor:
             	item.setChecked(!item.isChecked());
             	useGravity(item.isChecked());
+            	return true;
+            case R.id.ballsCheck:
+            	item.setChecked(!item.isChecked());
+            	showBalls(item.isChecked());
+            	return true;
+            case R.id.cpu:
+            	item.setChecked(!item.isChecked());
+            	showCPU(item.isChecked());
+            	return true;
+            case R.id.fpsCheck:
+            	item.setChecked(!item.isChecked());
+            	showFPS(item.isChecked());
+            	return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
     
-    private void useGravity(boolean checked) {
+    private void showBalls(boolean checked) {
+		game.getThread().showBalls(checked);
+	}
+
+	private void showFPS(boolean checked) {
+		game.getThread().showFPS(checked);
+	}
+
+	private void showCPU(boolean checked) {
+		game.getThread().showCPU(checked);		
+	}
+
+	private void useGravity(boolean checked) {
 		game.getThread().useGravity(checked);	
 	}
 
@@ -119,18 +144,49 @@ public class Game extends Activity implements SensorEventListener {
 		game.getThread().notifyGravity(gravity);
 	}
 	
+	@Override
+	public void onRestart() {
+    	Log.d(TAG, "Restart");
+    	super.onRestart();
+	}
+	
+	@Override
+    public void onResume() {
+    	Log.d(TAG, "Resume");
+    	super.onResume();
+    	game.resume();
+    }
+	
+	@Override
+	public void onStart() {
+    	Log.d(TAG, "Start");
+    	super.onStart();
+	}
+	
     @Override
     public void onPause() {
     	Log.d(TAG, "Pause");
-    	game.pause();
     	super.onPause();
+    	game.pause();
+    }    
+    
+    @Override
+    public void onStop() {
+    	Log.d(TAG, "Stop");
+    	super.onStop();
+    	game.pause();
     }
     
     @Override
-    public void onResume() {
-    	super.onResume();
-    	Log.d(TAG, "Resume");
-    	game.resume();
+    public void onDestroy() {
+    	Log.d(TAG, "Destroy");
+    	super.onDestroy();
+    }
+    
+    @Override 
+    public void finish() {
+    	Log.d(TAG, "Finishing");
+    	super.finish();
     }
 
 	public void onAccuracyChanged(Sensor arg0, int arg1) {
