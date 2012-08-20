@@ -17,6 +17,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 
+/** Testing branch **/
+// Pausing and resuming fails
+
 public class MainActivity extends Activity implements SensorEventListener {
 
 	private static final String TAG = MainActivity.class.getSimpleName();
