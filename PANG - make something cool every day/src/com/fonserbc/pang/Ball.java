@@ -45,7 +45,7 @@ public class Ball {
 		sprite = sprites[it];
 		width = sprites[it].getWidth();
 		height = sprites[it].getHeight();
-		bounce = 450f*(0.5f + (float)Math.log(1f + ((float)Math.E-1) * scale) * 0.5f);
+		bounce = game.MAX_BOUNCE*(0.5f + (float)Math.log(1f + ((float)Math.E-1) * scale) * 0.5f);
 	}
 	
 	public void update (float deltaTime) {
@@ -89,7 +89,7 @@ public class Ball {
 		}
 	}
 	
-	public void draw (Canvas canvas) {
+	public void onDraw (Canvas canvas) {
 		canvas.drawBitmap(sprite, position.x, position.y, null);
 	}
 
@@ -103,22 +103,28 @@ public class Ball {
 	}
 
 	public void divide(ArrayList<Ball> balls) {
-		if (scale > 0.25) {
+		if (scale >= 0.25) {
 			Ball b1 = new Ball(sprites, gameView, game);
 			Ball b2 = new Ball(sprites, gameView, game);
 			
 			b1.setScale(it+1);
 			b2.setScale(it+1);
 			
-			b1.position = new Vector2f(position.x+width/2, position.y+height/2);
-			b2.position = new Vector2f(position.x+width/2, position.y+height/2);
+			b1.position = new Vector2f(position.x+width/2-width/4, position.y+height/2);
+			b2.position = new Vector2f(position.x+width/2+width/4, position.y+height/2);
 			
-			Vector2f g = game.gravity.normalized();
-			float v1 = g.dotProduct(velocity);
-			Vector2f V1 = g.scale(v1);
-			Vector2f V2 = velocity.minus(V1);
-			b1.velocity = V1.plus(V2);
-			b2.velocity = V1.plus(V2.inversed());
+			if (Prefs.useSensor) {
+				Vector2f g = game.gravity.normalized();
+				float v1 = g.dotProduct(velocity);
+				Vector2f V1 = g.scale(v1);
+				Vector2f V2 = velocity.minus(V1);
+				b1.velocity = V1.plus(V2);
+				b2.velocity = V1.plus(V2.inversed());
+			}
+			else {
+				b1.velocity = new Vector2f(-velocity.x, -game.MAX_BOUNCE/4);
+				b2.velocity = new Vector2f(velocity.x, -game.MAX_BOUNCE/4);
+			}
 			
 			balls.add(b1);
 			balls.add(b2);

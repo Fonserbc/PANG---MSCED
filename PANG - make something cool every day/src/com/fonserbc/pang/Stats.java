@@ -82,7 +82,7 @@ public class Stats {
 	public void draw (Canvas canvas) {
 		if (canvas != null) {
 			Paint paint = new Paint();
-			paint.setARGB(255, 255, 255, 255);
+			paint.setARGB(255, 0, 0, 0);
 			paint.setTextSize(FONT_SIZE);
 			if (Prefs.showFPS) canvas.drawText(fpsString+" / "+game.MAX_FPS, 20, 20, paint);
 			if (Prefs.showCPU) canvas.drawText(cpuString, 20, 40, paint);

@@ -2,6 +2,7 @@
 
     <string name="app_name">PANG - MSCED</string>
     <string name="title_activity_game">PANG</string>
+    <string name="dev_settings">Dev Settings</string>
     <string name="number_of_balls">Number of balls</string>
     <string name="sensor">Use gravity sensor</string>
     <string name="other">Other settings</string>

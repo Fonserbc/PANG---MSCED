@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.FloatMath;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -39,7 +40,10 @@ public class GameThread extends Thread
 	
 	private Bitmap[] ballSprites;
 	
+	public Scene scene;
+	
 	public Vector2f gravity;
+	public float MAX_BOUNCE = 450f;
 
 	public GameThread(SurfaceHolder surfaceHolder, GameView gameView) {
 		super();
@@ -59,11 +63,16 @@ public class GameThread extends Thread
 	public void run() {		
 		//INIT		
 		Canvas canvas;
-		ballSprites = new Bitmap[3];
+		ballSprites = new Bitmap[4];
 		ballSprites[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(gameView.getResources(), R.drawable.bola), 
 				gameView.getHeight()/4, gameView.getHeight()/4, false);
 		ballSprites[1] = Bitmap.createScaledBitmap(ballSprites[0], ballSprites[0].getWidth()/2, ballSprites[0].getHeight()/2, false);
 		ballSprites[2] = Bitmap.createScaledBitmap(ballSprites[1], ballSprites[1].getWidth()/2, ballSprites[1].getHeight()/2, false);
+		ballSprites[3] = Bitmap.createScaledBitmap(ballSprites[2], ballSprites[2].getWidth()/2, ballSprites[2].getHeight()/2, false);
+		
+		MAX_BOUNCE = FloatMath.sqrt(2f*DEF_GM*(float)(gameView.getHeight()-gameView.getHeight()/3));
+		
+		scene = new Scene(gameView);
 		
 		float deltaTime = 0;
 		long deltaTimeMs = 0;
@@ -103,9 +112,9 @@ public class GameThread extends Thread
 								ball.update(deltaTime);
 							
 							//Draw	
-							canvas.drawColor(Color.BLACK);
+							scene.onDraw(canvas);
 							for (Ball ball : balls)
-								ball.draw(canvas);
+								ball.onDraw(canvas);
 						}
 						stats.draw(canvas);
 						/**Game Update&Draw**/
@@ -113,7 +122,7 @@ public class GameThread extends Thread
 					
 					/**SLEEP**/
 					long workingTime = timer.falseTickMs();
-					sleepTime = FRAME_PERIOD - workingTime;
+					sleepTime = 2*FRAME_PERIOD - workingTime - deltaTimeMs;
 					stats.updateFPS();
 					
 					if (sleepTime > 0) {
