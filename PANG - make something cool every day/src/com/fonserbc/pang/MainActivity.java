@@ -15,12 +15,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
-public class Game extends Activity implements SensorEventListener {
+public class MainActivity extends Activity implements SensorEventListener {
 
-	private static final String TAG = Game.class.getSimpleName();
+	private static final String TAG = MainActivity.class.getSimpleName();
+	
+	private Preferences Prefs = Preferences.getInstance();
 	
 	private SensorManager sm;
 	
@@ -56,12 +57,12 @@ public class Game extends Activity implements SensorEventListener {
 	
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		MainThread thread = game.getThread();
+		GameThread thread = game.getThread();
 		
-		menu.findItem(R.id.sensor).setChecked(thread.useSensor);
-		menu.findItem(R.id.ballsCheck).setChecked(thread.stats.showBalls);
-		menu.findItem(R.id.fpsCheck).setChecked(thread.stats.showFPS);
-		menu.findItem(R.id.cpu).setChecked(thread.showCPU);
+		menu.findItem(R.id.sensor).setChecked(Prefs.useSensor);
+		menu.findItem(R.id.ballsCheck).setChecked(Prefs.showBalls);
+		menu.findItem(R.id.fpsCheck).setChecked(Prefs.showFPS);
+		menu.findItem(R.id.cpu).setChecked(Prefs.showCPU);
 		
 		if (disableSensor) {
 			menu.findItem(R.id.sensor).setEnabled(false);
@@ -106,19 +107,20 @@ public class Game extends Activity implements SensorEventListener {
     }
     
     private void showBalls(boolean checked) {
-		game.getThread().showBalls(checked);
+    	Prefs.showBalls = checked;
 	}
 
 	private void showFPS(boolean checked) {
-		game.getThread().showFPS(checked);
+		Prefs.showFPS = checked;
 	}
 
 	private void showCPU(boolean checked) {
-		game.getThread().showCPU(checked);		
+		Prefs.showCPU = checked;		
 	}
 
 	private void useGravity(boolean checked) {
 		activateSensor(checked);
+		Prefs.useSensor = checked;
 		game.getThread().useGravity(checked);	
 	}
 	
@@ -259,28 +261,29 @@ public class Game extends Activity implements SensorEventListener {
     
     private void savePrefs() {
     	SharedPreferences.Editor ed = mPrefs.edit();
-    	MainThread thread = game.getThread();
+    	GameThread thread = game.getThread();
     	
-        ed.putInt("FPS", thread.MAX_FPS);
-        ed.putBoolean("useSensor", thread.useSensor);
+        ed.putInt("FPS", Prefs.FPS);
+        ed.putBoolean("useSensor", Prefs.useSensor);
         
-        ed.putBoolean("showCPU", thread.showCPU);
-        ed.putBoolean("showFPS", thread.stats.showFPS);
-        ed.putBoolean("showBalls", thread.stats.showBalls);
+        ed.putBoolean("showCPU", Prefs.showCPU);
+        ed.putBoolean("showFPS", Prefs.showFPS);
+        ed.putBoolean("showBalls", Prefs.showBalls);
         
         ed.commit();
 	}
     
     private void restorePrefs() {
     	mPrefs = getPreferences(MODE_PRIVATE);
-    	MainThread thread = game.getThread();
     	
-        thread.setFPS(mPrefs.getInt("FPS", thread.MAX_FPS));
-        thread.useSensor = mPrefs.getBoolean("useSensor", thread.useSensor);
+    	Prefs.FPS = mPrefs.getInt("FPS", Prefs.FPS);
+    	game.getThread().setFPS(Prefs.FPS);
+        Prefs.useSensor = mPrefs.getBoolean("useSensor", Prefs.useSensor);
+        activateSensor(Prefs.useSensor);
         
-        thread.showCPU(mPrefs.getBoolean("showCPU", thread.showCPU));
-        thread.showFPS(mPrefs.getBoolean("showFPS", thread.stats.showFPS));
-        thread.showBalls(mPrefs.getBoolean("showBalls", thread.stats.showBalls));
+        Prefs.showCPU = mPrefs.getBoolean("showCPU", Prefs.showCPU);
+        Prefs.showFPS = mPrefs.getBoolean("showFPS", Prefs.showFPS);
+        Prefs.showBalls = mPrefs.getBoolean("showBalls", Prefs.showBalls);
 	}
 
 	public void onAccuracyChanged(Sensor arg0, int arg1) {

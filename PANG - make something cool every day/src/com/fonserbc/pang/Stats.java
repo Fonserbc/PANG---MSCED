@@ -7,7 +7,9 @@ import android.graphics.Paint;
 import android.util.Log;
 
 public class Stats {
-	private static final String TAG = Game.class.getSimpleName();;
+	private Preferences Prefs = Preferences.getInstance();
+	
+	private static final String TAG = MainActivity.class.getSimpleName();
 	
     private DecimalFormat df = new DecimalFormat("0.##");
     private DecimalFormat dfCPU = new DecimalFormat("0.###");
@@ -35,13 +37,9 @@ public class Stats {
 	private int it = 0;
 	private int cpuIt = 0;
 	
-	public boolean showFPS = false;
-	public boolean showCPU = false;
-	public boolean showBalls = false;
+	private GameThread game;
 	
-	private MainThread game;
-	
-	public Stats(MainThread thread) {
+	public Stats(GameThread thread) {
 		game = thread;
 		timerFPS = new Timer();
 		timerFPS.setReal(true);
@@ -86,9 +84,9 @@ public class Stats {
 			Paint paint = new Paint();
 			paint.setARGB(255, 255, 255, 255);
 			paint.setTextSize(FONT_SIZE);
-			if (showFPS) canvas.drawText(fpsString+" / "+game.MAX_FPS, 20, 20, paint);
-			if (showCPU) canvas.drawText(cpuString, 20, 40, paint);
-			if (showBalls) {
+			if (Prefs.showFPS) canvas.drawText(fpsString+" / "+game.MAX_FPS, 20, 20, paint);
+			if (Prefs.showCPU) canvas.drawText(cpuString, 20, 40, paint);
+			if (Prefs.showBalls) {
 				String ballsString;
 				synchronized (game.balls) {
 					ballsString = game.balls.size() + " balls";
@@ -118,18 +116,5 @@ public class Stats {
 			
 			CPUIntervalTimer = 0;
 		}
-	}
-
-	public void showCPU(boolean checked) {
-		showCPU = checked;		
-	}
-	
-	public void showFPS(boolean checked) {
-		showFPS = checked;
-	}
-
-	public void showBalls(boolean checked) {
-		showBalls = checked;
-	}
-	
+	}	
 }

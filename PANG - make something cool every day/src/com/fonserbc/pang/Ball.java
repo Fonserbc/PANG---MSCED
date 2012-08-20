@@ -7,13 +7,14 @@ import android.graphics.Canvas;
 import android.util.Log;
 
 public class Ball {
+	private Preferences Prefs = Preferences.getInstance();
 	
 	private static final String TAG = Ball.class.getSimpleName();
 	
 	private Bitmap[] sprites;
 	private Bitmap sprite;
 	private GameView gameView;
-	private MainThread game;
+	private GameThread game;
 	
 	public Vector2f position;
 	public Vector2f velocity;
@@ -25,7 +26,7 @@ public class Ball {
 	public int it;
 	
 	
-	public Ball (Bitmap[] sprites, GameView gameView, MainThread thread) {
+	public Ball (Bitmap[] sprites, GameView gameView, GameThread thread) {
 		this.sprites = sprites;
 		this.gameView = gameView;
 		this.game = thread;
@@ -56,7 +57,7 @@ public class Ball {
 		velocity.x += game.gravity.x * deltaTime;
 		velocity.y += game.gravity.y * deltaTime;
 		
-		if (!game.useSensor) {
+		if (!Prefs.useSensor) {
 			if (position.x + width > gameView.getWidth() && velocity.x > 0f) {
 				velocity.x = -velocity.x;
 			}

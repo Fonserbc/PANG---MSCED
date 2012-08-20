@@ -12,13 +12,15 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-public class MainThread extends Thread 
+public class GameThread extends Thread 
 {
-	public int 		MAX_FPS = 60;
+	private Preferences Prefs = Preferences.getInstance();
+	
+	public int 		MAX_FPS = Prefs.FPS;
 	private int		FRAME_PERIOD = 1000 / MAX_FPS;	
 	public int		NUM_BALLS = 1;
 	
-	private static final String TAG = MainThread.class.getSimpleName();
+	private static final String TAG = GameThread.class.getSimpleName();
 	private static final float DEF_GX = 0f;
 	private static final float DEF_GY = 300f;
 	private static final float DEF_GM = 300f;
@@ -31,18 +33,15 @@ public class MainThread extends Thread
 	private Timer timer;
 	private Timer timerCPU;
 	
-	public Stats stats;
+	private Stats stats;
 	
 	public ArrayList<Ball> balls;
 	
 	private Bitmap[] ballSprites;
 	
 	public Vector2f gravity;
-	
-	boolean useSensor = false;
-	boolean showCPU = false;
 
-	public MainThread(SurfaceHolder surfaceHolder, GameView gameView) {
+	public GameThread(SurfaceHolder surfaceHolder, GameView gameView) {
 		super();
 		this.surfaceHolder = surfaceHolder;
 		this.gameView = gameView;
@@ -61,7 +60,8 @@ public class MainThread extends Thread
 		//INIT		
 		Canvas canvas;
 		ballSprites = new Bitmap[3];
-		ballSprites[0] = BitmapFactory.decodeResource(gameView.getResources(), R.drawable.bola);
+		ballSprites[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(gameView.getResources(), R.drawable.bola), 
+				gameView.getHeight()/4, gameView.getHeight()/4, false);
 		ballSprites[1] = Bitmap.createScaledBitmap(ballSprites[0], ballSprites[0].getWidth()/2, ballSprites[0].getHeight()/2, false);
 		ballSprites[2] = Bitmap.createScaledBitmap(ballSprites[1], ballSprites[1].getWidth()/2, ballSprites[1].getHeight()/2, false);
 		
@@ -85,7 +85,7 @@ public class MainThread extends Thread
 		while (!this.isInterrupted()) {
 			if (running) {
 				canvas = null;
-				if (showCPU) {
+				if (Prefs.showCPU) {
 					float cpuTick = timerCPU.tick();
 					stats.updateCPU(lastCPUtime/cpuTick);
 				}
@@ -128,7 +128,7 @@ public class MainThread extends Thread
 					}
 				}
 				
-				if (showCPU) lastCPUtime = timerCPU.falseTick();
+				if (Prefs.showCPU) lastCPUtime = timerCPU.falseTick();
 			}
 			else {	//Paused
 				try { Thread.sleep(100); } catch (InterruptedException ie) {}
@@ -176,11 +176,8 @@ public class MainThread extends Thread
 	}
 
 	public void useGravity(boolean use) {
-		if (use) useSensor = true;
-		else {
-			useSensor = false;
+		if (!use)
 			gravity = new Vector2f(DEF_GX, DEF_GY);
-		}
 	}
 
 	public void notifyGravity(Vector2f gravity) {
@@ -194,18 +191,5 @@ public class MainThread extends Thread
 
 	public void saveState(Bundle outState) {
 		
-	}
-
-	public void showCPU(boolean checked) {
-		showCPU = checked;
-		stats.showCPU(checked);
-	}
-
-	public void showFPS(boolean checked) {
-		stats.showFPS(checked);
-	}
-
-	public void showBalls(boolean checked) {
-		stats.showBalls(checked);		
 	}
 }

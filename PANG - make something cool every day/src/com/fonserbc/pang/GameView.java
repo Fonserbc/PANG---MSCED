@@ -11,12 +11,12 @@ import android.view.SurfaceView;
 public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
 	private static final String TAG = GameView.class.getSimpleName();
-	private MainThread thread;
+	private GameThread thread;
 	
 	public GameView(Context context) {
 		super(context);getHolder().addCallback(this);
 		
-		thread = new MainThread(getHolder(), this);
+		thread = new GameThread(getHolder(), this);
 		
 		setFocusable(true);
 	}
@@ -42,7 +42,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 	
-	public MainThread getThread() {
+	public GameThread getThread() {
 		return thread;
 	}
 
