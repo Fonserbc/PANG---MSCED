@@ -1,9 +1,6 @@
 package com.fonserbc.pang;
 
-import android.app.Activity;
 import android.content.Context;
-import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -14,22 +11,23 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	private GameThread thread;
 	
 	public GameView(Context context) {
-		super(context);getHolder().addCallback(this);
-		
-		thread = new GameThread(getHolder(), this);
+		super(context);
+		getHolder().addCallback(this);
 		
 		setFocusable(true);
 	}
 
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
+		thread = new GameThread(getHolder(), this);
 		
-	}
-
-	public void surfaceCreated(SurfaceHolder arg0) {
 		thread.setRunning(true);
 		thread.start();
 	}
 
+	public void surfaceCreated(SurfaceHolder arg0) {
+	
+	}
+	
 	public void surfaceDestroyed(SurfaceHolder arg0) {
 		boolean retry = true;
 		while (retry) {
@@ -52,21 +50,4 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		return super.onTouchEvent(event);
 	}
-	
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-	    if (keyCode == KeyEvent.KEYCODE_BACK) {
-	    	((Activity)getContext()).finish();
-	        return true;
-	    }
-	    return super.onKeyDown(keyCode, event);
-	}
-	
-	public void pause() {
-		thread.setRunning(false);
-	}
-
-	public void resume() {
-		thread.setRunning(true);
-	}	
 }

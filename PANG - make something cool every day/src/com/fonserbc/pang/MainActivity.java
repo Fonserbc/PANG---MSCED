@@ -10,6 +10,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,9 +28,16 @@ public class MainActivity extends Activity implements SensorEventListener {
 	
 	private SharedPreferences mPrefs;
 	
+	private AlertDialog pauseMenu;
+	
 	private boolean disableSensor = false;
 	
-	GameView game;
+	private WelcomeView welcomeView;
+	private GameView game;
+	
+	private GameThread thread;
+	
+	private boolean onWelcomeScreen = false;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -41,24 +49,25 @@ public class MainActivity extends Activity implements SensorEventListener {
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        welcomeView = new WelcomeView(this);
         game = new GameView(this);
+        thread = game.getThread();
         
-        restorePrefs();
+        //restorePrefs();
         
-        setContentView(game);
+        welcomeView.getThread().setRunning(true);
+        setContentView(welcomeView);
         Log.d(TAG, "Create");
     }
 
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_game, menu);
+        getMenuInflater().inflate(R.menu.settings, menu);
         return true;
     }
 	
 	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		GameThread thread = game.getThread();
-		
+	public boolean onPrepareOptionsMenu(Menu menu) {		
 		menu.findItem(R.id.sensor).setChecked(Prefs.useSensor);
 		menu.findItem(R.id.ballsCheck).setChecked(Prefs.showBalls);
 		menu.findItem(R.id.fpsCheck).setChecked(Prefs.showFPS);
@@ -121,7 +130,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private void useGravity(boolean checked) {
 		activateSensor(checked);
 		Prefs.useSensor = checked;
-		game.getThread().useGravity(checked);	
+		thread.useGravity(checked);	
 	}
 	
 	private void activateSensor (boolean activate) {
@@ -149,14 +158,14 @@ public class MainActivity extends Activity implements SensorEventListener {
               
               String text = name.getText().toString();
               if (text != null) {
-            	  int n = game.getThread().MAX_FPS;
+            	  int n = thread.MAX_FPS;
             	  boolean parsed = false;
             	  try {
             		  n = Integer.parseInt(text);
             		  parsed = true;
             	  } catch (NumberFormatException e) {}
             	  
-            	  if (parsed) game.getThread().setFPS(n);
+            	  if (parsed) thread.setFPS(n);
               }
             }
           })
@@ -178,14 +187,14 @@ public class MainActivity extends Activity implements SensorEventListener {
                
               String text = name.getText().toString();
               if (text != null) {
-            	  int n = game.getThread().NUM_BALLS;
+            	  int n = thread.NUM_BALLS;
             	  boolean parsed = false;
             	  try {
             		  n = Integer.parseInt(text);
             		  parsed = true;
             	  } catch (NumberFormatException e) {}
             	  
-            	  if (parsed) game.getThread().setBalls(n);
+            	  if (parsed) thread.setBalls(n);
               }
             }
           })
@@ -198,7 +207,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		
 		Vector2f gravity = new Vector2f(event.values[1], event.values[0]);
 		
-		game.getThread().notifyGravity(gravity);
+		thread.notifyGravity(gravity);
 	}
 	
 	@Override
@@ -223,7 +232,6 @@ public class MainActivity extends Activity implements SensorEventListener {
     public void onResume() {
     	Log.d(TAG, "Resume");
     	super.onResume();
-    	game.resume();
     }
 	
 	@Override
@@ -236,15 +244,15 @@ public class MainActivity extends Activity implements SensorEventListener {
     public void onPause() {
     	Log.d(TAG, "Pause");
     	super.onPause();
-    	game.pause();
-    	savePrefs();
+    	thread.setRunning(false);
+    	popPauseMenu();
+    	//savePrefs();
     }    
 
 	@Override
     public void onStop() {
     	Log.d(TAG, "Stop");
     	super.onStop();
-    	game.pause();
     }
     
     @Override
@@ -261,7 +269,6 @@ public class MainActivity extends Activity implements SensorEventListener {
     
     private void savePrefs() {
     	SharedPreferences.Editor ed = mPrefs.edit();
-    	GameThread thread = game.getThread();
     	
         ed.putInt("FPS", Prefs.FPS);
         ed.putBoolean("useSensor", Prefs.useSensor);
@@ -277,7 +284,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     	mPrefs = getPreferences(MODE_PRIVATE);
     	
     	Prefs.FPS = mPrefs.getInt("FPS", Prefs.FPS);
-    	game.getThread().setFPS(Prefs.FPS);
+    	thread.setFPS(Prefs.FPS);
         Prefs.useSensor = mPrefs.getBoolean("useSensor", Prefs.useSensor);
         activateSensor(Prefs.useSensor);
         
@@ -288,5 +295,61 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	public void onAccuracyChanged(Sensor arg0, int arg1) {
 		
+	}
+	
+	@Override
+	public boolean onKeyDown (int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			if (!welcomeView.isFocused()) {
+				//TODO reparar parche
+		        thread = game.getThread();
+
+		    	if (thread.isRunning()) {
+			    	thread.setRunning(false);
+			    	popPauseMenu();
+		    	}
+		    	else {
+		    		pauseMenu.cancel();
+		    		thread.setRunning(true);
+		    	}
+		        return true;
+			}
+	    }
+	    return super.onKeyDown(keyCode, event);
+	}
+	
+	private void popPauseMenu() {
+		final MainActivity that = this;
+		pauseMenu = new AlertDialog.Builder(this)
+        .setTitle("Game Paused")
+        .setPositiveButton("Resume", new DialogInterface.OnClickListener() {
+    		public void onClick(DialogInterface dialog, int whichButton) {             
+    			thread.setRunning(true);
+    		}
+        })
+        .setNegativeButton("Quit", new DialogInterface.OnClickListener() {
+    		public void onClick(DialogInterface dialog, int whichButton) {             
+    			finish();
+    		}
+        })
+        .setNeutralButton("Back to menu", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				thread.setRunning(false);
+				that.setContentView(welcomeView);
+				onWelcomeScreen = true;
+				welcomeView.resume();
+			}
+		})
+        .setOnCancelListener(new DialogInterface.OnCancelListener() {
+			public void onCancel(DialogInterface dialog) {
+				thread.setRunning(true);
+			}
+		})
+        .show();		
+	}
+
+	public void startGame() {
+		onWelcomeScreen = false;
+		setContentView(game);		
 	}
 }

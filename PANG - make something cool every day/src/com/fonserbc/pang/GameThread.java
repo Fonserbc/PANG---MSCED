@@ -62,7 +62,7 @@ public class GameThread extends Thread
 	@Override
 	public void run() {		
 		//INIT		
-		Canvas canvas;
+		Canvas canvas = null;
 		ballSprites = new Bitmap[4];
 		ballSprites[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(gameView.getResources(), R.drawable.bola), 
 				gameView.getHeight()/4, gameView.getHeight()/4, false);
@@ -93,7 +93,6 @@ public class GameThread extends Thread
 		//RUN
 		while (!this.isInterrupted()) {
 			if (running) {
-				canvas = null;
 				if (Prefs.showCPU) {
 					float cpuTick = timerCPU.tick();
 					stats.updateCPU(lastCPUtime/cpuTick);
@@ -200,5 +199,9 @@ public class GameThread extends Thread
 
 	public void saveState(Bundle outState) {
 		
+	}
+
+	public boolean isRunning() {
+		return running;
 	}
 }
